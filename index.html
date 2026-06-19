@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#185FA5">
+<title>漢字テスト 4択クイズ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+--font:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;
+--jp:'Noto Sans JP',var(--font);
+--tx:#23221e;--tx2:#6b6a64;--tx3:#9a988f;
+--bg:#faf8f3;--card:#ffffff;--surf:#f1efe8;--surf2:#e7e4dc;
+--bd:rgba(0,0,0,.10);--bd2:rgba(0,0,0,.22);
+--blue:#185FA5;--blue-d:#0C447C;--blue-bg:#E6F1FB;--blue-tx:#185FA5;
+--green:#1D9E75;--green-d:#0F6E56;--green-bg:#E1F5EE;
+--red:#E24B4A;--red-d:#A32D2D;--red-bg:#FCEBEB;
+--amber-bg:#FAEEDA;--amber-tx:#BA7517;
+--r:10px;--r-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+--tx:#ecebe6;--tx2:#a8a69e;--tx3:#76746d;
+--bg:#1c1b16;--card:#26251f;--surf:#2f2e27;--surf2:#3a382f;
+--bd:rgba(255,255,255,.12);--bd2:rgba(255,255,255,.26);
+--blue:#378ADD;--blue-d:#85B7EB;--blue-bg:#0C447C;--blue-tx:#B5D4F4;
+--green:#1D9E75;--green-d:#5DCAA5;--green-bg:#085041;
+--red:#E24B4A;--red-d:#F09595;--red-bg:#791F1F;
+--amber-bg:#633806;--amber-tx:#FAC775;
+}}
+*{box-sizing:border-box;}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--font);
+-webkit-text-size-adjust:100%;}
+body{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);min-height:100vh;
+min-height:100dvh;}
+.wrap{max-width:520px;margin:0 auto;padding:14px;}
+
+/* ヘッダー */
+.hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.hd h1{font-size:17px;font-weight:600;margin:0;letter-spacing:.01em;}
+.hd .gear{background:none;border:none;color:var(--tx2);font-size:22px;cursor:pointer;
+padding:6px;line-height:1;border-radius:8px;}
+.hd .gear:active{background:var(--surf);}
+
+.card{background:var(--card);border:0.5px solid var(--bd);border-radius:var(--r-lg);
+padding:18px 16px 20px;}
+
+/* セットアップ */
+.setup{text-align:center;}
+.setup h2{font-size:18px;font-weight:600;margin:4px 0 4px;}
+.setup .sub{font-size:13px;color:var(--tx2);margin:0 0 16px;}
+.range-list{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;text-align:left;}
+.range-item{display:flex;align-items:center;gap:10px;padding:13px 14px;background:var(--surf);
+border:1.5px solid transparent;border-radius:var(--r);cursor:pointer;transition:border-color .12s,background .12s;}
+.range-item.sel{border-color:var(--blue);background:var(--blue-bg);}
+.range-item .nm{font-size:15px;font-weight:500;flex:1;}
+.range-item .meta{font-size:12px;color:var(--tx3);}
+.range-item .ck{width:20px;height:20px;border-radius:50%;border:2px solid var(--bd2);
+display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.range-item.sel .ck{border-color:var(--blue);background:var(--blue);color:#fff;font-size:12px;}
+.qcount{font-size:12px;color:var(--tx3);margin:10px 0 2px;}
+.modes{display:flex;gap:8px;justify-content:center;margin:6px 0 4px;flex-wrap:wrap;}
+.chip{font-size:13px;padding:7px 14px;border:0.5px solid var(--bd2);border-radius:20px;
+background:var(--card);color:var(--tx2);cursor:pointer;}
+.chip.on{background:var(--blue);color:#fff;border-color:var(--blue);}
+.btn-primary{width:100%;margin-top:14px;padding:15px;font-family:var(--font);font-size:16px;
+font-weight:600;border:none;border-radius:var(--r);background:var(--blue);color:#fff;cursor:pointer;}
+.btn-primary:active{background:var(--blue-d);}
+.btn-primary:disabled{opacity:.4;cursor:default;}
+
+/* クイズ */
+.quiz-top{display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:12px;color:var(--tx2);}
+.prog{height:6px;background:var(--surf2);border-radius:3px;overflow:hidden;flex:1;}
+.prog-bar{height:100%;background:var(--green);width:0;transition:width .3s;}
+.badge{font-size:11px;color:var(--amber-tx);background:var(--amber-bg);padding:3px 9px;border-radius:10px;white-space:nowrap;}
+.stem{font-family:var(--jp);font-size:22px;line-height:2.1;margin:0 0 20px;letter-spacing:.02em;
+min-height:2.2em;word-break:break-all;}
+.blank{display:inline-flex;align-items:center;justify-content:center;width:1.55em;height:1.55em;
+border:2px solid var(--blue);border-radius:7px;vertical-align:-.38em;margin:0 .08em;
+background:var(--blue-bg);color:var(--blue-tx);font-size:.82em;font-weight:500;}
+.blank.ok{border-color:var(--green);background:var(--green-bg);color:var(--green-d);}
+.blank.ng{border-color:var(--red);background:var(--red-bg);color:var(--red-d);}
+.yomi{font-size:11px;color:var(--tx3);vertical-align:.4em;margin:0 1px;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.opt{font-family:var(--jp);font-size:32px;padding:18px 8px;background:var(--card);
+border:0.5px solid var(--bd2);border-radius:var(--r);cursor:pointer;color:var(--tx);
+transition:transform .07s,background .12s,border-color .12s;-webkit-tap-highlight-color:transparent;}
+.opt:active:not(:disabled){transform:scale(.96);}
+.opt:disabled{cursor:default;}
+.opt.correct{background:var(--green-bg);border-color:var(--green);color:var(--green-d);}
+.opt.incorrect{background:var(--red-bg);border-color:var(--red);color:var(--red-d);}
+.opt.dim{opacity:.35;}
+.fb{text-align:center;min-height:1.5em;margin:18px 0 2px;font-size:15px;font-weight:600;}
+.fb.ok{color:var(--green-d);}.fb.ng{color:var(--red-d);}
+.btn-next{display:block;width:100%;margin-top:12px;padding:14px;font-family:var(--font);
+font-size:15px;font-weight:500;border:0.5px solid var(--bd2);border-radius:var(--r);
+background:var(--card);color:var(--tx);cursor:pointer;}
+.btn-next:active{background:var(--surf);}
+
+/* 結果 */
+.result{text-align:center;}
+.result h2{font-size:18px;font-weight:600;margin:4px 0 2px;}
+.score{font-size:46px;font-weight:700;margin:8px 0 2px;color:var(--tx);}
+.rlabel{font-size:13px;color:var(--tx2);margin-bottom:16px;}
+.review{text-align:left;background:var(--surf);border-radius:var(--r);padding:12px 14px;margin:12px 0;}
+.review h3{font-size:13px;font-weight:600;margin:0 0 8px;color:var(--tx2);}
+.rrow{display:flex;align-items:baseline;gap:10px;padding:5px 0;font-size:14px;}
+.rrow .rk{font-family:var(--jp);font-size:22px;color:var(--red-d);min-width:1.2em;text-align:center;font-weight:500;}
+.rrow .rs{color:var(--tx2);font-family:var(--jp);}
+
+/* 設定/範囲管理 オーバーレイ */
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:flex-end;
+justify-content:center;z-index:50;}
+.sheet-inner{background:var(--card);width:100%;max-width:520px;max-height:90vh;max-height:90dvh;
+overflow-y:auto;border-radius:18px 18px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom));}
+.sheet-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sheet-hd h2{font-size:17px;font-weight:600;margin:0;}
+.sheet-hd .x{background:none;border:none;font-size:24px;color:var(--tx2);cursor:pointer;line-height:1;padding:4px;}
+.mrange{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--surf);
+border-radius:var(--r);margin-bottom:8px;}
+.mrange .mn{flex:1;font-size:14px;font-weight:500;}
+.mrange .mm{font-size:11px;color:var(--tx3);}
+.mrange .del{background:none;border:none;color:var(--red-d);font-size:18px;cursor:pointer;padding:4px 8px;}
+.mrange .lock{font-size:11px;color:var(--tx3);padding:4px 8px;}
+.addbtns{display:flex;gap:8px;margin-top:12px;}
+.addbtns button{flex:1;padding:13px;font-family:var(--font);font-size:14px;font-weight:500;
+border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--card);color:var(--tx);cursor:pointer;}
+.addbtns button:active{background:var(--surf);}
+.addbtns button.accent{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+/* フォーム */
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:12px;color:var(--tx2);margin-bottom:5px;font-weight:500;}
+.field input,.field textarea{width:100%;font-family:var(--jp);font-size:15px;padding:11px 12px;
+border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--card);color:var(--tx);}
+.field textarea{min-height:120px;resize:vertical;font-size:13px;line-height:1.5;}
+.field .hint{font-size:11px;color:var(--tx3);margin-top:4px;}
+.qrow{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;
+padding:10px;background:var(--surf);border-radius:var(--r);margin-bottom:8px;}
+.qrow .qn{font-size:13px;color:var(--tx3);font-weight:600;padding-top:10px;}
+.qrow .qf{display:flex;flex-direction:column;gap:6px;}
+.qrow .qf .line{display:flex;gap:6px;}
+.qrow input{width:100%;font-family:var(--jp);font-size:14px;padding:9px 10px;
+border:0.5px solid var(--bd2);border-radius:8px;background:var(--card);color:var(--tx);}
+.qrow input.k{flex:0 0 64px;text-align:center;}
+.qrow input.y{flex:0 0 90px;}
+.qrow .del{background:none;border:none;color:var(--red-d);font-size:16px;cursor:pointer;}
+.preview-line{font-family:var(--jp);font-size:14px;color:var(--tx2);padding:4px 2px;}
+.preview-line .bk{display:inline-block;min-width:1.3em;padding:0 .15em;border-bottom:2px solid var(--blue);
+text-align:center;color:var(--blue-tx);}
+.msg{font-size:13px;padding:10px 12px;border-radius:var(--r);margin:10px 0;}
+.msg.err{background:var(--red-bg);color:var(--red-d);}
+.msg.ok{background:var(--green-bg);color:var(--green-d);}
+.hidden{display:none!important;}
+
+/* 320〜360px の狭い端末 */
+@media(max-width:360px){
+.stem{font-size:20px;}
+.opt{font-size:28px;padding:15px 6px;}
+.wrap{padding:10px;}
+.card{padding:15px 13px 17px;}
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <h1>漢字テスト 4択クイズ</h1>
+    <button class="gear" id="gear-btn" aria-label="範囲の管理">⚙</button>
+  </div>
+
+  <!-- セットアップ -->
+  <div id="scr-setup">
+    <div class="card setup">
+      <h2>復習する範囲をえらぼう</h2>
+      <div class="sub">タップで選択（複数えらべます)</div>
+      <div class="range-list" id="range-list"></div>
+      <div class="qcount" id="qcount">出題数：25問</div>
+      <div class="modes" id="modes">
+        <button class="chip on" data-lim="all">ぜんぶ</button>
+        <button class="chip" data-lim="10">10問</button>
+        <button class="chip" data-lim="20">20問</button>
+      </div>
+      <button class="btn-primary" id="start-btn">はじめる</button>
+    </div>
+  </div>
+
+  <!-- クイズ -->
+  <div id="scr-quiz" class="hidden">
+    <div class="card">
+      <div class="quiz-top">
+        <span id="q-count">1 / 25</span>
+        <div class="prog"><div class="prog-bar" id="q-bar"></div></div>
+        <span id="q-badge"></span>
+      </div>
+      <div class="stem" id="stem"></div>
+      <div class="opts" id="opts"></div>
+      <div class="fb" id="fb"></div>
+      <button class="btn-next hidden" id="next-btn">つぎへ</button>
+    </div>
+  </div>
+
+  <!-- 結果 -->
+  <div id="scr-result" class="hidden">
+    <div class="card result" id="result"></div>
+  </div>
+</div>
+
+<!-- 範囲管理シート -->
+<div class="sheet hidden" id="sheet">
+  <div class="sheet-inner">
+    <div class="sheet-hd">
+      <h2 id="sheet-title">範囲の管理</h2>
+      <button class="x" id="sheet-close" aria-label="閉じる">×</button>
+    </div>
+
+    <!-- メニュー -->
+    <div id="sv-menu">
+      <div id="manage-list"></div>
+      <div class="addbtns">
+        <button id="btn-manual">＋ 手入力で追加</button>
+        <button id="btn-import" class="accent">データを貼り付け</button>
+      </div>
+    </div>
+
+    <!-- 手入力 -->
+    <div id="sv-manual" class="hidden">
+      <div class="field">
+        <label>範囲の名前</label>
+        <input id="manual-title" placeholder="例：春に習う漢字③">
+      </div>
+      <div id="manual-rows"></div>
+      <button class="btn-next" id="manual-add" style="margin-top:4px">＋ 問題を追加</button>
+      <div id="manual-msg"></div>
+      <div class="addbtns">
+        <button id="manual-back">もどる</button>
+        <button id="manual-save" class="accent">保存する</button>
+      </div>
+    </div>
+
+    <!-- JSON取込 -->
+    <div id="sv-import" class="hidden">
+      <div class="field">
+        <label>問題データ（JSON)を貼り付け</label>
+        <textarea id="import-area" placeholder='Claudeが作ったデータをここに貼り付けてください'></textarea>
+        <div class="hint">写真から読み取ったデータをそのまま貼り付けられます。</div>
+      </div>
+      <div id="import-msg"></div>
+      <div class="addbtns">
+        <button id="import-back">もどる</button>
+        <button id="import-do" class="accent">取り込む</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const APP_DATA = {"builtin":{"A":{"title":"類似問題 A（春に習う漢字②)","range":"39〜50","items":[{"n":1,"k":"容","c":[{"pre":"","y":"よう","a":"容","post":"器に入れる。","ok":""},{"pre":"話の内","y":"よう","a":"容","post":"をまとめる。","ok":""},{"pre":"","y":"よう","a":"容","post":"易な問題。","ok":""}]},{"n":2,"k":"技","c":[{"pre":"","y":"わざ","a":"技","post":"をきそう。","ok":""},{"pre":"新しい","y":"ぎ","a":"技","post":"術をまなぶ。","ok":""},{"pre":"とくいな","y":"わざ","a":"技","post":"。","ok":""}]},{"n":3,"k":"適","c":[{"pre":"","y":"てき","a":"適","post":"度に運動する。","ok":""},{"pre":"","y":"てき","a":"適","post":"切な言葉。","ok":""},{"pre":"","y":"てき","a":"適","post":"当にえらぶ。","ok":""}]},{"n":4,"k":"許","c":[{"pre":"外出を","y":"ゆる","a":"許","post":"。","ok":"す"},{"pre":"入場の","y":"きょ","a":"許","post":"可をもらう。","ok":""},{"pre":"失敗を","y":"ゆる","a":"許","post":"。","ok":"す"}]},{"n":5,"k":"復","c":[{"pre":"","y":"ふく","a":"復","post":"習をする。","ok":""},{"pre":"駅を","y":"おう","a":"復","post":"する。","ok":""},{"pre":"元気が","y":"かい","a":"復","post":"する。","ok":""}]},{"n":6,"k":"構","c":[{"pre":"文の","y":"こう","a":"構","post":"成を考える。","ok":""},{"pre":"絵の","y":"こう","a":"構","post":"図。","ok":""},{"pre":"家を","y":"かま","a":"構","post":"。","ok":"える"}]},{"n":7,"k":"桜","c":[{"pre":"","y":"さくら","a":"桜","post":"の木の下。","ok":""},{"pre":"","y":"さくら","a":"桜","post":"がさく。","ok":""},{"pre":"葉","y":"ざくら","a":"桜","post":"になる。","ok":""}]},{"n":8,"k":"銅","c":[{"pre":"","y":"どう","a":"銅","post":"像を見る。","ok":""},{"pre":"","y":"どう","a":"銅","post":"メダルを取る。","ok":""},{"pre":"青","y":"どう","a":"銅","post":"の器。","ok":""}]},{"n":9,"k":"破","c":[{"pre":"やくそくを","y":"やぶ","a":"破","post":"。","ok":"る"},{"pre":"ふくろが","y":"やぶ","a":"破","post":"。","ok":"れる"},{"pre":"記ろくを","y":"やぶ","a":"破","post":"。","ok":"る"}]},{"n":10,"k":"修","c":[{"pre":"学問を","y":"おさ","a":"修","post":"める。","ok":""},{"pre":"車を","y":"しゅう","a":"修","post":"理する。","ok":""},{"pre":"","y":"しゅう","a":"修","post":"学旅行。","ok":""}]},{"n":11,"k":"眼","c":[{"pre":"","y":"がん","a":"眼","post":"鏡をかける。","ok":""},{"pre":"","y":"がん","a":"眼","post":"科に行く。","ok":""},{"pre":"近","y":"がん","a":"眼","post":"になる。","ok":""}]},{"n":12,"k":"停","c":[{"pre":"バス","y":"てい","a":"停","post":"に着く。","ok":""},{"pre":"電車が","y":"てい","a":"停","post":"車する。","ok":""},{"pre":"急","y":"てい","a":"停","post":"止する。","ok":""}]},{"n":13,"k":"祖","c":[{"pre":"","y":"そ","a":"祖","post":"先をうやまう。","ok":""},{"pre":"","y":"そ","a":"祖","post":"父の家へ行く。","ok":""},{"pre":"","y":"そ","a":"祖","post":"母とすごす。","ok":""}]},{"n":14,"k":"備","c":[{"pre":"台風に","y":"そな","a":"備","post":"。","ok":"える"},{"pre":"じゅん","y":"び","a":"備","post":"運動。","ok":""},{"pre":"ぼうさい","y":"び","a":"備","post":"品をそろえる。","ok":""}]},{"n":15,"k":"貿","c":[{"pre":"外国と","y":"ぼう","a":"貿","post":"易をする。","ok":""},{"pre":"","y":"ぼう","a":"貿","post":"易港。","ok":""},{"pre":"自由","y":"ぼう","a":"貿","post":"易。","ok":""}]},{"n":16,"k":"際","c":[{"pre":"わかれ","y":"ぎわ","a":"際","post":"のあいさつ。","ok":""},{"pre":"国","y":"さい","a":"際","post":"会議。","ok":""},{"pre":"この","y":"さい","a":"際","post":"決める。","ok":""}]},{"n":17,"k":"潔","c":[{"pre":"","y":"けっ","a":"潔","post":"白をしめす。","ok":""},{"pre":"せい","y":"けつ","a":"潔","post":"なふく。","ok":""},{"pre":"いさぎ","y":"いさぎ","a":"潔","post":"い。","ok":"い"}]},{"n":18,"k":"質","c":[{"pre":"","y":"しつ","a":"質","post":"のよい品物。","ok":""},{"pre":"","y":"しつ","a":"質","post":"問をする。","ok":""},{"pre":"ひん","y":"しつ","a":"質","post":"をたもつ。","ok":""}]},{"n":19,"k":"報","c":[{"pre":"","y":"ほう","a":"報","post":"道番組を見る。","ok":""},{"pre":"けっかを","y":"ほう","a":"報","post":"告する。","ok":""},{"pre":"天気予","y":"ほう","a":"報","post":"。","ok":""}]},{"n":20,"k":"属","c":[{"pre":"金","y":"ぞく","a":"属","post":"の板。","ok":""},{"pre":"チームに所","y":"ぞく","a":"属","post":"する。","ok":""},{"pre":"","y":"ぞく","a":"属","post":"性を調べる。","ok":""}]},{"n":21,"k":"確","c":[{"pre":"答えを","y":"かく","a":"確","post":"認する。","ok":""},{"pre":"予定を","y":"たし","a":"確","post":"。","ok":"かめる"},{"pre":"せい","y":"かく","a":"確","post":"な答え。","ok":""}]},{"n":22,"k":"識","c":[{"pre":"知","y":"しき","a":"識","post":"を深める。","ok":""},{"pre":"い","y":"しき","a":"識","post":"が高い。","ok":""},{"pre":"","y":"しき","a":"識","post":"別する。","ok":""}]},{"n":23,"k":"部","c":[{"pre":"サッカー","y":"ぶ","a":"部","post":"に入る。","ok":""},{"pre":"","y":"ぶ","a":"部","post":"分に分ける。","ok":""},{"pre":"ぜん","y":"ぶ","a":"部","post":"終わる。","ok":""}]},{"n":24,"k":"丸","c":[{"pre":"","y":"まる","a":"丸","post":"い月が出る。","ok":"い"},{"pre":"","y":"まる","a":"丸","post":"太を運ぶ。","ok":""},{"pre":"日の","y":"まる","a":"丸","post":"のはた。","ok":""}]},{"n":25,"k":"外","c":[{"pre":"","y":"がい","a":"外","post":"国へ行く。","ok":""},{"pre":"","y":"がい","a":"外","post":"出をひかえる。","ok":""},{"pre":"い","y":"がい","a":"外","post":"な答え。","ok":""}]}]},"B":{"title":"類似問題 B（春に習う漢字②)","range":"39〜50","items":[{"n":1,"k":"像","c":[{"pre":"","y":"ぞう","a":"像","post":"をきざむ。","ok":""},{"pre":"そう","y":"ぞう","a":"像","post":"する。","ok":""},{"pre":"が","y":"ぞう","a":"像","post":"を見る。","ok":""}]},{"n":2,"k":"経","c":[{"pre":"国道を","y":"けい","a":"経","post":"由する。","ok":""},{"pre":"","y":"けい","a":"経","post":"験をつむ。","ok":""},{"pre":"し","y":"けい","a":"経","post":"を休める。","ok":""}]},{"n":3,"k":"情","c":[{"pre":"","y":"じょう","a":"情","post":"報を集める。","ok":""},{"pre":"心","y":"じょう","a":"情","post":"をえがく。","ok":""},{"pre":"ひょう","y":"じょう","a":"情","post":"があかるい。","ok":""}]},{"n":4,"k":"象","c":[{"pre":"気","y":"しょう","a":"象","post":"を観測する。","ok":""},{"pre":"いん","y":"しょう","a":"象","post":"に残る。","ok":""},{"pre":"たい","y":"しょう","a":"象","post":"を調べる。","ok":""}]},{"n":5,"k":"絶","c":[{"pre":"","y":"ぜっ","a":"絶","post":"好の天気。","ok":""},{"pre":"","y":"ぜっ","a":"絶","post":"対にやる。","ok":""},{"pre":"き","y":"ぜつ","a":"絶","post":"する。","ok":""}]},{"n":6,"k":"厚","c":[{"pre":"","y":"あつ","a":"厚","post":"紙を切る。","ok":""},{"pre":"","y":"あつ","a":"厚","post":"い本。","ok":"い"},{"pre":"","y":"あつ","a":"厚","post":"着をする。","ok":""}]},{"n":7,"k":"賞","c":[{"pre":"一等","y":"しょう","a":"賞","post":"を取る。","ok":""},{"pre":"","y":"しょう","a":"賞","post":"状をもらう。","ok":""},{"pre":"にゅう","y":"しょう","a":"賞","post":"する。","ok":""}]},{"n":8,"k":"喜","c":[{"pre":"再会を","y":"よろこ","a":"喜","post":"。","ok":"ぶ"},{"pre":"","y":"おおよろこ","a":"喜","post":"びする。","ok":"び"},{"pre":"","y":"き","a":"喜","post":"色をうかべる。","ok":""}]},{"n":9,"k":"解","c":[{"pre":"問題を","y":"かい","a":"解","post":"答する。","ok":""},{"pre":"り","y":"かい","a":"解","post":"する。","ok":""},{"pre":"せい","y":"かい","a":"解","post":"を出す。","ok":""}]},{"n":10,"k":"経","c":[{"pre":"三年が","y":"へ","a":"経","post":"。","ok":"る"},{"pre":"時が","y":"へ","a":"経","post":"。","ok":"る"},{"pre":"年月を","y":"へ","a":"経","post":"。","ok":"る"}]},{"n":11,"k":"情","c":[{"pre":"","y":"なさ","a":"情","post":"けをかける。","ok":"け"},{"pre":"","y":"なさ","a":"情","post":"け深い人。","ok":"け"},{"pre":"人","y":"じょう","a":"情","post":"にあつい。","ok":""}]},{"n":12,"k":"象","c":[{"pre":"","y":"ぞう","a":"象","post":"がすむ動物園。","ok":""},{"pre":"","y":"ぞう","a":"象","post":"の鼻は長い。","ok":""},{"pre":"きょ","y":"ぞう","a":"象","post":"があらわれる。","ok":""}]},{"n":13,"k":"絶","c":[{"pre":"声が","y":"た","a":"絶","post":"。","ok":"える"},{"pre":"人通りが","y":"た","a":"絶","post":"。","ok":"える"},{"pre":"けむりを","y":"た","a":"絶","post":"。","ok":"やす"}]},{"n":14,"k":"喜","c":[{"pre":"","y":"き","a":"喜","post":"色をうかべる。","ok":""},{"pre":"","y":"き","a":"喜","post":"げきを見る。","ok":""},{"pre":"ひ","y":"き","a":"喜","post":"こもごも。","ok":""}]},{"n":15,"k":"解","c":[{"pre":"ひもを","y":"と","a":"解","post":"。","ok":"く"},{"pre":"問題を","y":"と","a":"解","post":"。","ok":"く"},{"pre":"気持ちが","y":"と","a":"解","post":"。","ok":"ける"}]},{"n":16,"k":"最","c":[{"pre":"","y":"さい","a":"最","post":"後まで走る。","ok":""},{"pre":"","y":"さい","a":"最","post":"近の話。","ok":""},{"pre":"","y":"さい","a":"最","post":"高記ろく。","ok":""}]},{"n":17,"k":"連","c":[{"pre":"家族で","y":"れん","a":"連","post":"休に出かける。","ok":""},{"pre":"","y":"れん","a":"連","post":"想する。","ok":""},{"pre":"","y":"れん","a":"連","post":"続して勝つ。","ok":""}]},{"n":18,"k":"伝","c":[{"pre":"話を","y":"つた","a":"伝","post":"。","ok":"える"},{"pre":"文章で","y":"つた","a":"伝","post":"。","ok":"える"},{"pre":"","y":"でん","a":"伝","post":"言をのこす。","ok":""}]},{"n":19,"k":"材","c":[{"pre":"","y":"ざい","a":"材","post":"料を集める。","ok":""},{"pre":"しょく","y":"ざい","a":"材","post":"を買う。","ok":""},{"pre":"もく","y":"ざい","a":"材","post":"を切る。","ok":""}]},{"n":20,"k":"標","c":[{"pre":"道路","y":"ひょう","a":"標","post":"識を見る。","ok":""},{"pre":"もく","y":"ひょう","a":"標","post":"を立てる。","ok":""},{"pre":"","y":"ひょう","a":"標","post":"本を作る。","ok":""}]},{"n":21,"k":"健","c":[{"pre":"","y":"けん","a":"健","post":"康に気をつける。","ok":""},{"pre":"","y":"けん","a":"健","post":"全に育つ。","ok":""},{"pre":"ほ","y":"けん","a":"健","post":"室へ行く。","ok":""}]},{"n":22,"k":"録","c":[{"pre":"番組を","y":"ろく","a":"録","post":"画する。","ok":""},{"pre":"き","y":"ろく","a":"録","post":"をのこす。","ok":""},{"pre":"とう","y":"ろく","a":"録","post":"する。","ok":""}]},{"n":23,"k":"課","c":[{"pre":"","y":"か","a":"課","post":"外活動をする。","ok":""},{"pre":"","y":"か","a":"課","post":"題を出す。","ok":""},{"pre":"日","y":"か","a":"課","post":"の運動。","ok":""}]},{"n":24,"k":"変","c":[{"pre":"","y":"へん","a":"変","post":"身する。","ok":""},{"pre":"","y":"へん","a":"変","post":"化をとらえる。","ok":""},{"pre":"大","y":"へん","a":"変","post":"なできごと。","ok":""}]},{"n":25,"k":"関","c":[{"pre":"自然に","y":"かん","a":"関","post":"心を持つ。","ok":""},{"pre":"","y":"かん","a":"関","post":"係を表す。","ok":""},{"pre":"","y":"かん","a":"関","post":"所をこえる。","ok":""}]}]}},"confus":{"容":["客","谷","溶"],"技":["枝","支","岐"],"適":["敵","摘","滴"],"許":["評","計","訂"],"復":["複","腹","履"],"構":["講","溝","横"],"桜":["梅","松","株"],"銅":["同","胴","洞"],"破":["波","彼","披"],"修":["条","作","他"],"眼":["眠","根","銀"],"停":["亭","低","底"],"祖":["組","租","粗"],"備":["供","構","準"],"貿":["賀","資","貯"],"際":["祭","察","擦"],"潔":["結","契","清"],"質":["貨","賃","資"],"報":["服","郡","築"],"属":["族","続","員"],"確":["格","角","岩"],"識":["織","職","議"],"部":["郊","郡","都"],"丸":["九","凡","刈"],"外":["処","夕","名"],"像":["象","造","橋"],"経":["径","軽","茎"],"情":["精","清","晴"],"象":["像","予","証"],"絶":["色","給","紹"],"厚":["原","厘","屋"],"賞":["償","党","堂"],"喜":["善","壱","直"],"解":["触","角","欠"],"連":["運","軍","車"],"伝":["仏","云","転"],"材":["村","林","財"],"標":["票","漂","渡"],"健":["建","康","津"],"録":["緑","縁","禄"],"課":["果","裸","菓"],"変":["夜","赤","恋"],"関":["閉","開","間"],"最":["景","量","暑"]},"pool":["世","主","交","付","仕","代","以","仲","件","任","休","伝","似","住","作","使","例","係","便","信","倉","候","借","停","健","側","働","億","兆","児","全","公","具","典","内","冷","処","列","初","判","別","利","助","勉","動","勝","化","区","医","卒","協","原","参","反","取","受","号","向","君","味","命","和","品","員","商","問","喜","回","因","園","在","地","堂","報","場","塩","士","変","夫","央","失","好","妹","妻","始","委","守","完","官","定","実","客","宮","害","家","容","宿","寒","寺","対","局","屋","岸","島","州","帳","常","幸","度","庫","庭","式","役","待","急","息","悪","悲","想","感","愛","意","成","戦","戸","所","投","折","拾","持","指","放","整","旅","族","昔","昭","暑","暗","曲","有","服","望","期","未","本","札","材","村","束","柱","根","案","植","業","様","横","橋","機","欠","次","歯","歴","残","殺","毛","氏","民","求","決","油","波","注","泣","洋","流","消","深","温","港","湖","湯","満","漁","火","点","無","然","焼","照","熱","物","特","犬","由","申","界","畑","病","発","登","的","皆","県","短","石","研","礼","神","祭","福","私","秒","究","答","箱","節","約","級","終","組","結","給","絵","続","緑","練","羊","美","習","老","者","育","胃","脈","腸","臣","航","良","芸","荷","落","葉","薬","血","表","詩","課","調","談","議","豆","貨","責","賞","起","路","身","軽","農","返","追","送","速","進","遊","運","過","道","達","都","配","酒","重","野","量","金","鉄","銀","録","開","院","陽","階","集","面","題","顔","願","類","飛","飯","館","首","香"]};
+</script>
+<script>
+// ===== 漢字テスト 4択クイズ アプリ ロジック =====
+// APP_DATA は別途埋め込まれる(builtin範囲・confus・pool)
+(function(){
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const LS_KEY="kanjiQuiz.userRanges.v1";
+const LS_SEL="kanjiQuiz.selected.v1";
+
+// ---- 範囲データの統合(組み込み + ユーザー追加) ----
+function loadUserRanges(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)||"{}"); }
+  catch(e){ return {}; }
+}
+function saveUserRanges(obj){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(obj)); }
+  catch(e){ alert("保存できませんでした。ブラウザの設定をご確認ください。"); }
+}
+function allRanges(){
+  // 戻り値: {id:{title,range,items,builtin:bool}}
+  const out={};
+  for(const [k,v] of Object.entries(APP_DATA.builtin)){
+    out["builtin:"+k]={title:v.title,range:v.range,items:v.items,builtin:true};
+  }
+  const user=loadUserRanges();
+  for(const [id,v] of Object.entries(user)){
+    out["user:"+id]={title:v.title,range:v.range||"",items:v.items,builtin:false};
+  }
+  return out;
+}
+
+// ---- 誤答生成 ----
+function makeDistractors(kanji, allKanjiInUse){
+  let pool=[];
+  // 1) 既知の紛らわしい字
+  if(APP_DATA.confus[kanji]) pool.push(...APP_DATA.confus[kanji]);
+  // 2) 使用中の他の漢字
+  pool.push(...allKanjiInUse.filter(k=>k!==kanji));
+  // 3) 汎用プール
+  pool.push(...APP_DATA.pool);
+  // 重複・自分自身を除去
+  const seen=new Set([kanji]); const res=[];
+  shuffle(pool);
+  // まず confus を優先したいので、先頭の confus 分はシャッフルせず使う
+  const conf=(APP_DATA.confus[kanji]||[]).filter(k=>k!==kanji);
+  for(const c of conf){ if(res.length>=3)break; if(!seen.has(c)){seen.add(c);res.push(c);} }
+  for(const c of pool){ if(res.length>=3)break; if(!seen.has(c)){seen.add(c);res.push(c);} }
+  return res.slice(0,3);
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// ---- 状態 ----
+let selectedIds=new Set();
+let queue=[],idx=0,wrong=[],round=1,firstTotal=0,firstCorrect=0,answered=false;
+let limitMode="all"; // all / 10 / 20
+
+// ---- セットアップ画面 ----
+function renderSetup(){
+  const ranges=allRanges();
+  // 選択状態の復元
+  if(selectedIds.size===0){
+    try{ const s=JSON.parse(localStorage.getItem(LS_SEL)||"[]"); s.forEach(id=>{if(ranges[id])selectedIds.add(id);}); }catch(e){}
+    if(selectedIds.size===0) selectedIds.add("builtin:A");
+  }
+  const list=$("#range-list"); list.innerHTML="";
+  for(const [id,r] of Object.entries(ranges)){
+    const div=document.createElement("div");
+    div.className="range-item"+(selectedIds.has(id)?" sel":"");
+    div.innerHTML=`<div class="ck">${selectedIds.has(id)?"✓":""}</div>
+      <div class="nm">${esc(r.title)}</div>
+      <div class="meta">${r.items.length}問</div>`;
+    div.addEventListener("click",()=>{
+      if(selectedIds.has(id))selectedIds.delete(id); else selectedIds.add(id);
+      persistSel(); renderSetup();
+    });
+    list.appendChild(div);
+  }
+  updateCount();
+}
+function persistSel(){ try{localStorage.setItem(LS_SEL,JSON.stringify([...selectedIds]));}catch(e){} }
+function selectedItems(){
+  const ranges=allRanges(); let items=[];
+  for(const id of selectedIds){ if(ranges[id]) items.push(...ranges[id].items); }
+  return items;
+}
+function updateCount(){
+  const n=selectedItems().length;
+  let q=n; if(limitMode==="10")q=Math.min(10,n); if(limitMode==="20")q=Math.min(20,n);
+  $("#qcount").textContent = n===0? "範囲をえらんでください" : `出題数：${q}問`;
+  $("#start-btn").disabled = n===0;
+}
+
+// ---- クイズ ----
+function buildQ(item, allK){
+  const c=item.c[Math.floor(Math.random()*item.c.length)];
+  const correct=item.k;
+  let opts=[correct, ...makeDistractors(correct, allK)];
+  opts=shuffle(opts);
+  return {item,c,correct,opts};
+}
+function start(){
+  let items=shuffle(selectedItems().slice());
+  let lim=items.length;
+  if(limitMode==="10")lim=Math.min(10,items.length);
+  if(limitMode==="20")lim=Math.min(20,items.length);
+  items=items.slice(0,lim);
+  const allK=items.map(i=>i.k);
+  queue=items.map(it=>buildQ(it,allK));
+  idx=0;wrong=[];round=1;firstTotal=queue.length;firstCorrect=0;
+  show("quiz"); renderQ();
+}
+function renderQ(){
+  answered=false;
+  const q=queue[idx];
+  $("#q-count").textContent=`${idx+1} / ${queue.length}`;
+  $("#q-bar").style.width=(idx/queue.length*100)+"%";
+  $("#q-badge").innerHTML=round>1?`<span class="badge">復習 ${round-1}回目</span>`:"";
+  const c=q.c;
+  let stem=esc(c.pre)+`<span class="blank" id="bl">?</span>`;
+  if(c.y)stem+=`<span class="yomi">${esc(c.y)}</span>`;
+  stem+=esc(c.ok)+esc(c.post);
+  $("#stem").innerHTML=stem;
+  const ob=$("#opts");ob.innerHTML="";
+  q.opts.forEach(op=>{
+    const b=document.createElement("button");
+    b.className="opt";b.textContent=op;b.dataset.k=op;
+    b.addEventListener("click",()=>choose(b,q));
+    ob.appendChild(b);
+  });
+  $("#fb").textContent="";$("#fb").className="fb";
+  $("#next-btn").classList.add("hidden");
+}
+function choose(btn,q){
+  if(answered)return;answered=true;
+  const sel=btn.dataset.k,correct=q.correct,bl=$("#bl");
+  $$("#opts .opt").forEach(b=>{
+    b.disabled=true;
+    if(b.dataset.k===correct)b.classList.add("correct");
+    else if(b===btn)b.classList.add("incorrect");
+    else b.classList.add("dim");
+  });
+  if(sel===correct){
+    bl.classList.add("ok");bl.textContent=correct;
+    $("#fb").textContent="正解！";$("#fb").className="fb ok";
+    if(round===1)firstCorrect++;
+  }else{
+    bl.classList.add("ng");bl.textContent=sel;
+    $("#fb").textContent=`正解は「${correct}」`;$("#fb").className="fb ng";
+    wrong.push(q);
+  }
+  $("#next-btn").textContent=(idx+1<queue.length)?"つぎへ":"けっかを見る";
+  $("#next-btn").classList.remove("hidden");
+}
+function next(){
+  idx++;
+  if(idx<queue.length){renderQ();return;}
+  if(wrong.length>0){
+    const allK=wrong.map(q=>q.item.k);
+    queue=wrong.map(q=>buildQ(q.item,allK));
+    wrong=[];idx=0;round++;renderQ();
+  }else finish();
+}
+function finish(){
+  const pct=Math.round(firstCorrect/firstTotal*100);
+  const msg=pct===100?"全問正解！すばらしい":pct>=80?"よくできました":pct>=60?"あと少し":"もう一度ふくしゅうしよう";
+  let h=`<h2>おつかれさま</h2><div class="score">${firstCorrect} / ${firstTotal}</div>
+    <div class="rlabel">1回目の正答率 ${pct}%　・　${msg}</div>
+    <button class="btn-primary" id="again-btn">もう一回（新しい問題)</button>`;
+  $("#result").innerHTML=h;
+  $("#again-btn").addEventListener("click",()=>show("setup")&renderSetup());
+  show("result");
+}
+
+// ---- 画面切替 ----
+function show(name){
+  ["setup","quiz","result"].forEach(n=>$("#scr-"+n).classList.toggle("hidden",n!==name));
+}
+
+// ---- 範囲管理シート ----
+function openManage(){
+  renderManage(); $("#sheet").classList.remove("hidden");
+}
+function closeSheet(){ $("#sheet").classList.add("hidden"); }
+function renderManage(){
+  const ranges=allRanges(); const box=$("#manage-list"); box.innerHTML="";
+  for(const [id,r] of Object.entries(ranges)){
+    const div=document.createElement("div");div.className="mrange";
+    div.innerHTML=`<div><div class="mn">${esc(r.title)}</div>
+      <div class="mm">${r.items.length}問</div></div>`;
+    const right=document.createElement("div");
+    if(r.builtin){ right.innerHTML=`<span class="lock">標準</span>`; }
+    else{
+      const del=document.createElement("button");del.className="del";del.textContent="🗑";
+      del.addEventListener("click",()=>{
+        if(confirm(`「${r.title}」を削除しますか？`)){
+          const u=loadUserRanges();delete u[id.replace("user:","")];saveUserRanges(u);
+          selectedIds.delete(id);persistSel();renderManage();
+        }
+      });
+      right.appendChild(del);
+    }
+    div.appendChild(right);
+    div.style.justifyContent="space-between";
+    box.appendChild(div);
+  }
+}
+
+// ---- JSON取込 ----
+function openImport(){ $("#import-area").value=""; $("#import-msg").textContent=""; showSheetView("import"); }
+function doImport(){
+  const txt=$("#import-area").value.trim();
+  if(!txt){setMsg("import-msg","データを貼り付けてください。","err");return;}
+  let data;
+  try{ data=JSON.parse(txt); }
+  catch(e){ setMsg("import-msg","JSONの形式が正しくありません。","err");return; }
+  // 単一範囲 or 複数範囲に対応
+  let ranges=[];
+  if(Array.isArray(data)) ranges=data;
+  else if(data.items) ranges=[data];
+  else if(data.ranges&&Array.isArray(data.ranges)) ranges=data.ranges;
+  else { setMsg("import-msg","range形式が認識できません。","err");return; }
+  // 検証
+  const u=loadUserRanges(); let added=0;
+  for(const r of ranges){
+    if(!r.items||!Array.isArray(r.items)||r.items.length===0){continue;}
+    const items=r.items.map(normalizeItem).filter(Boolean);
+    if(items.length===0)continue;
+    const id="r"+Date.now()+"_"+Math.floor(Math.random()*1000);
+    u[id]={title:r.title||"追加した範囲",range:r.range||"",items};
+    added++;
+  }
+  if(added===0){setMsg("import-msg","追加できる範囲がありませんでした。","err");return;}
+  saveUserRanges(u);
+  setMsg("import-msg",`${added}個の範囲を追加しました。`,"ok");
+  setTimeout(()=>{backToMenu();renderSetup();},900);
+}
+function normalizeItem(it){
+  // 受け入れ: {n,k,c:[{pre,y,a,post,ok}]} または {num,kanji,cands:[{pre,yomi,answer,post,okuri}]}
+  const k=it.k||it.kanji; if(!k)return null;
+  let cands=it.c||it.cands; 
+  if(!cands||!cands.length){
+    // 単一例文形式 {pre,yomi,answer,post,okuri}
+    if(it.answer||it.a) cands=[it];
+    else return null;
+  }
+  const c=cands.map(x=>({
+    pre:x.pre||"", y:x.y||x.yomi||"", a:x.a||x.answer||k,
+    post:x.post||"", ok:x.ok||x.okuri||""
+  })).filter(x=>x.a);
+  if(!c.length)return null;
+  return {n:it.n||it.num||0, k, c};
+}
+
+// ---- 手入力フォーム ----
+let formRows=[];
+function openManual(){
+  formRows=[{k:"",y:"",pre:"",post:"",ok:""}];
+  $("#manual-title").value="";
+  renderForm(); showSheetView("manual");
+}
+function renderForm(){
+  const box=$("#manual-rows");box.innerHTML="";
+  formRows.forEach((row,i)=>{
+    const div=document.createElement("div");div.className="qrow";
+    div.innerHTML=`<div class="qn">${i+1}</div>`;
+    const qf=document.createElement("div");qf.className="qf";
+    qf.innerHTML=`
+      <div class="line">
+        <input class="k" placeholder="漢字" value="${escAttr(row.k)}" data-f="k" maxlength="3">
+        <input class="y" placeholder="読み" value="${escAttr(row.y)}" data-f="y">
+      </div>
+      <div class="line">
+        <input placeholder="前の文（例：本の内)" value="${escAttr(row.pre)}" data-f="pre">
+      </div>
+      <div class="line">
+        <input placeholder="後の文（例：器に入れる。)" value="${escAttr(row.post)}" data-f="post">
+        <input class="y" placeholder="送り" value="${escAttr(row.ok)}" data-f="ok">
+      </div>
+      <div class="preview-line"></div>`;
+    qf.querySelectorAll("input").forEach(inp=>{
+      inp.addEventListener("input",()=>{
+        row[inp.dataset.f]=inp.value; updatePreview(qf,row);
+      });
+    });
+    const del=document.createElement("button");del.className="del";del.textContent="✕";
+    del.addEventListener("click",()=>{formRows.splice(i,1);if(!formRows.length)formRows.push({k:"",y:"",pre:"",post:"",ok:""});renderForm();});
+    div.appendChild(qf);
+    if(formRows.length>1){const dwrap=document.createElement("div");dwrap.appendChild(del);div.appendChild(dwrap);}
+    box.appendChild(div);
+    updatePreview(qf,row);
+  });
+}
+function updatePreview(qf,row){
+  const pv=qf.querySelector(".preview-line");
+  if(!row.k&&!row.pre&&!row.post){pv.textContent="";return;}
+  pv.innerHTML=esc(row.pre)+`<span class="bk">${row.k?esc(row.k):"　"}</span>`
+    +(row.y?`<span style="font-size:11px;color:var(--tx3)">${esc(row.y)}</span>`:"")
+    +esc(row.ok)+esc(row.post);
+}
+function addFormRow(){ formRows.push({k:"",y:"",pre:"",post:"",ok:""}); renderForm();
+  const box=$("#manual-rows"); box.lastElementChild.scrollIntoView({behavior:"smooth",block:"center"}); }
+function saveManual(){
+  const title=$("#manual-title").value.trim()||"手入力の範囲";
+  const items=formRows.filter(r=>r.k).map((r,i)=>({
+    n:i+1, k:r.k.trim(),
+    c:[{pre:r.pre.trim(),y:r.y.trim(),a:r.k.trim(),post:r.post.trim(),ok:r.ok.trim()}]
+  }));
+  if(items.length===0){setMsg("manual-msg","漢字を1つ以上入力してください。","err");return;}
+  const u=loadUserRanges();
+  const id="r"+Date.now()+"_"+Math.floor(Math.random()*1000);
+  u[id]={title,range:"",items};
+  saveUserRanges(u);
+  setMsg("manual-msg",`「${title}」(${items.length}問)を追加しました。`,"ok");
+  setTimeout(()=>{backToMenu();renderSetup();},900);
+}
+
+// ---- シート内ビュー切替 ----
+function showSheetView(v){
+  ["menu","manual","import"].forEach(n=>$("#sv-"+n).classList.toggle("hidden",n!==v));
+  $("#sheet-title").textContent={menu:"範囲の管理",manual:"問題を手入力",import:"データを貼り付け"}[v];
+}
+function backToMenu(){ showSheetView("menu"); renderManage(); }
+
+// ---- ユーティリティ ----
+function setMsg(id,text,cls){const e=$("#"+id);e.textContent=text;e.className="msg "+cls;}
+function esc(s){return(s||"").replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));}
+function escAttr(s){return(s||"").replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+
+// ---- イベント ----
+function init(){
+  renderSetup();
+  $("#start-btn").addEventListener("click",start);
+  $("#next-btn").addEventListener("click",next);
+  $("#gear-btn").addEventListener("click",openManage);
+  $("#sheet-close").addEventListener("click",closeSheet);
+  $("#sheet").addEventListener("click",e=>{if(e.target===$("#sheet"))closeSheet();});
+  $("#btn-manual").addEventListener("click",openManual);
+  $("#btn-import").addEventListener("click",openImport);
+  $("#manual-add").addEventListener("click",addFormRow);
+  $("#manual-save").addEventListener("click",saveManual);
+  $("#manual-back").addEventListener("click",backToMenu);
+  $("#import-do").addEventListener("click",doImport);
+  $("#import-back").addEventListener("click",backToMenu);
+  $$("#modes .chip").forEach(c=>c.addEventListener("click",()=>{
+    $$("#modes .chip").forEach(x=>x.classList.remove("on"));
+    c.classList.add("on"); limitMode=c.dataset.lim; updateCount();
+  }));
+}
+if(document.readyState!=="loading")init(); else document.addEventListener("DOMContentLoaded",init);
+})();
+
+</script>
+</body>
+</html>
